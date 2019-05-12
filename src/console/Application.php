@@ -20,7 +20,7 @@ class Application
 
         // Show menu if there has no route input
         if (!$route) {
-            echo 'List Menu';
+            return 'List Menu';
         }
 
         // Route URL conversion
