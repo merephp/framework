@@ -45,8 +45,13 @@ class Application
                 : '';
             $controllerClass = "app\\commands\\" . str_replace("/", "\\", $controllerPath) . $controllerClassName;
 
+            // Route check
+            $action = end($routeArray);
             if (class_exists($controllerClass)) {
-                return $this->runController($controllerClass, end($routeArray), $parameters);
+                $controller = new $controllerClass();
+                if (method_exists($controller, $action)) {
+                    return $this->runController($controller, $action, $parameters);
+                }
             }
         }
 
@@ -58,9 +63,13 @@ class Application
             : '';
         $controllerClass = "app\\commands\\" . str_replace("/", "\\", $controllerPath) . $controllerClassName;
 
+        // Route check
+        $action = 'index';
         if (class_exists($controllerClass)) {
-            
-            return $this->runController($controllerClass, 'index', $parameters);
+            $controller = new $controllerClass();
+            if (method_exists($controller, $action)) {
+                return $this->runController($controller, $action, $parameters);
+            }
         }
         
         throw new UnknownCommandException("Giving route `{$route}` not found", 1);
@@ -68,12 +77,8 @@ class Application
         return 0;
     }
 
-    public function runController($controllerClass, $action, $parameters=[])
+    public function runController($controller, $action, $parameters=[])
     {
-        $controller = new $controllerClass();
-        if (!method_exists($controller, $action)) {
-            throw new UnknownCommandException("Controller action `{$action}` doesn't exist", 1);
-        }
         return call_user_func_array([$controller, $action], $parameters);
     }
 }
