@@ -7,44 +7,56 @@ defined('BASE_PATH') or define('BASE_PATH', __DIR__ . '/../../../');
  */
 
 /**
- * return `app` directory
+ * Return `app` directory
  *
+ * @param string $filePath
  * @return string
  */
-function app_path()
+function app_path($filePath=nul)
 {
-    return BASE_PATH . DIRECTORY_SEPARATOR . "app";
+    $relatedPath = DIRECTORY_SEPARATOR . "app";
+    $relatedPath = ($filePath) ? $relatedPath . DIRECTORY_SEPARATOR . trim($filePath, DIRECTORY_SEPARATOR) : $relatedPath;
+
+    return base_path($relatedPath);
 }
 
 /**
- * return project root directory
+ * Return project root directory
  *
+ * @param string $filePath
  * @return string
  */
-function base_path()
+function base_path($filePath=nul)
 {
-    return BASE_PATH;
+    $path = BASE_PATH;
+
+    return $path = ($filePath) ? $path . DIRECTORY_SEPARATOR . trim($filePath, DIRECTORY_SEPARATOR) : $path;
 }
 
 /**
- * return `public` directory
+ * Return `public` directory
  *
+ * @param string $filePath
  * @return string
  */
-function public_path()
+function public_path($filePath=nul)
 {
-    return BASE_PATH . DIRECTORY_SEPARATOR . "public";
+    $relatedPath = DIRECTORY_SEPARATOR . "public";
+    $relatedPath = ($filePath) ? $relatedPath . DIRECTORY_SEPARATOR . trim($filePath, DIRECTORY_SEPARATOR) : $relatedPath;
+
+    return base_path($relatedPath);
 }
 
 /**
- * return `storage` directory
+ * Return `storage` directory
  *
- * @param string $filepath
+ * @param string $filePath
  * @return string
  */
-function storage_path($filepath=null)
+function storage_path($filePath=nul)
 {
-    $path = BASE_PATH . DIRECTORY_SEPARATOR . "storage";
+    $relatedPath = DIRECTORY_SEPARATOR . "storage";
+    $relatedPath = ($filePath) ? $relatedPath . DIRECTORY_SEPARATOR . trim($filePath, DIRECTORY_SEPARATOR) : $relatedPath;
 
-    return $path = ($filepath) ? $path . DIRECTORY_SEPARATOR . $filepath : $path;
+    return base_path($relatedPath);
 }

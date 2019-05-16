@@ -20,7 +20,23 @@ class Application
 
         // Show menu if there has no route input
         if (!$route) {
-            return 'List Menu';
+
+            $files = array_diff(scandir(app_path('commands')), array('.', '..'));
+            var_dump($files);
+            echo app_path();exit;
+
+            $class = new \ReflectionClass("app\\commands\\ApiController");
+            $methods = $class->getMethods();
+            foreach($methods as $m) {
+                print $m->name;
+                $m->isPrivate() ? print "Private" : print "";
+                $m->isPublic() ? print "Public" : print "";
+                $params = $m->getParameters();
+                foreach($params as $p) {
+                    print $p->getName();
+                    }
+            }
+            return;
         }
 
         // Route URL conversion
