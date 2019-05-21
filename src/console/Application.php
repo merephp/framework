@@ -24,20 +24,17 @@ class Application
             // Parse all commands
             $menu = $this->_parseControllers(app_path('commands'));
 
-            var_dump($menu);exit;
+            // Guide
+            echo "\n\033[1mThe following commands are available:\033[0m\n";
 
-            echo app_path();exit;
-
-            $class = new \ReflectionClass("app\\commands\\ApiController");
-            $methods = $class->getMethods();
-            foreach($methods as $m) {
-                print $m->name;
-                $m->isPrivate() ? print "Private" : print "";
-                $m->isPublic() ? print "Public" : print "";
-                $params = $m->getParameters();
-                foreach($params as $p) {
-                    print $p->getName();
-                    }
+            // Print routes
+            foreach ($menu as $controller => $controllerMenu) {
+                // Controller
+                echo "\n- \e[33m{$controller}\e[0m  \033[1m{$controllerMenu['comment']}\033[0m\n";
+                foreach ($controllerMenu['list'] as $route => $actionMenu) {
+                    // Route
+                    echo "\e[32m    {$route}\e[0m {$actionMenu['comment']}\n";
+                }
             }
             return;
         }
@@ -133,11 +130,13 @@ class Application
                 // Get controller route name with folder layers
                 $controllerRoute = $prefix . $this->_toRoute(substr($controllerClass, 0, -10));
                 // Add into route menu
-                $menu[$controllerRoute] = [];
+                $menu[$controllerRoute] = ['comment'=>'', 'list'=>[]];
+                $selfMenu = &$menu[$controllerRoute];
 
                 // Get controller's namespace and get reflection
                 $prefixNS = str_replace("/", "\\", $prefix);
                 $class = new \ReflectionClass("app\\commands\\" . $prefixNS . $controllerClass);
+                $selfMenu['comment'] = $this->_getCommentTitle($class->getDocComment());
                 $methods = $class->getMethods();
                 foreach($methods as $method) {
                     // Get actions
@@ -145,7 +144,7 @@ class Application
                         // Method name to route name
                         $actionRoute = $this->_toRoute($method->name);
                         // Add into self-controller route menu
-                        $menu[$controllerRoute][] = "{$controllerRoute}/$actionRoute";
+                        $selfMenu['list']["{$controllerRoute}/$actionRoute"] = ['comment' => $this->_getCommentTitle($method->getDocComment())];
                     }
                 }
             }
@@ -175,5 +174,14 @@ class Application
         }, strtolower($route));
 
         return $route;
+    }
+
+    private function _getCommentTitle($commentString)
+    {
+        if (!$commentString) {
+            return '';
+        }
+        $pieces = explode("\n", $commentString);
+        return ltrim(ltrim($pieces[1], " * "));
     }
 }
