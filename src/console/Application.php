@@ -21,40 +21,8 @@ class Application
         // Show menu if there has no route input
         if (!$route) {
 
-            $commandsPath = app_path('commands');
-            $files = array_diff(scandir($commandsPath), array('.', '..'));
-            // var_dump($files);
-            $menu = [];
-
-            foreach ($files as $key => $filename) {
-                
-                $filePath = $commandsPath . DIRECTORY_SEPARATOR . $filename; 
-                if (is_dir($filePath)) {
-                    # code...
-                } else {
-                    // Controller file check
-                    if (strpos($filename, '.')===false || strpos($filename, 'Controller')===false) {
-                        continue;
-                    }
-
-                    $fileInfo = pathinfo($filename);
-                    $controllerClass = $fileInfo['filename'];
-                    $controllerRoute = $this->_toRoute(substr($controllerClass, 0, -10));
-                    // Add to route menu
-                    $menu[$controllerRoute] = [];
-
-                    $class = new \ReflectionClass("app\\commands\\" . $controllerClass);
-                    $methods = $class->getMethods();
-                    foreach($methods as $method) {
-
-                        if ($method->isPublic()) {
-                            $actionRoute = $this->_toRoute($method->name);
-                            // Add into self-controller route menu
-                            $menu[$controllerRoute][] = "{$controllerRoute}/$actionRoute";
-                        }
-                    }
-                }
-            }
+            // Parse all commands
+            $menu = $this->_parseControllers(app_path('commands'));
 
             var_dump($menu);exit;
 
@@ -131,6 +99,59 @@ class Application
     public function runController($controller, $action, $parameters=[])
     {
         return call_user_func_array([$controller, $action], $parameters);
+    }
+
+    /**
+     * Parse controller commands recursively
+     *
+     * @param string $path
+     * @param string $prefix Commands' folders route
+     * @return void
+     */
+    private function _parseControllers($path, $prefix='')
+    {
+        $menu = [];
+        
+        // Get all files from a commands folder
+        $files = array_diff(scandir($path), array('.', '..'));
+        foreach ($files as $key => $filename) {
+            
+            $filePath = $path . DIRECTORY_SEPARATOR . $filename; 
+            // Is a folder
+            if (is_dir($filePath)) {
+
+                $prefix .= "{$filename}/";
+                $menu = array_merge($menu, $this->_parseControllers($filePath, $prefix));
+
+            } 
+            // Is a controller
+            elseif (strpos($filename, '.')!==false && strpos($filename, 'Controller')!==false) {
+
+                // Get controller class name
+                $fileInfo = pathinfo($filename);
+                $controllerClass = $fileInfo['filename'];
+                // Get controller route name with folder layers
+                $controllerRoute = $prefix . $this->_toRoute(substr($controllerClass, 0, -10));
+                // Add into route menu
+                $menu[$controllerRoute] = [];
+
+                // Get controller's namespace and get reflection
+                $prefixNS = str_replace("/", "\\", $prefix);
+                $class = new \ReflectionClass("app\\commands\\" . $prefixNS . $controllerClass);
+                $methods = $class->getMethods();
+                foreach($methods as $method) {
+                    // Get actions
+                    if ($method->isPublic()) {
+                        // Method name to route name
+                        $actionRoute = $this->_toRoute($method->name);
+                        // Add into self-controller route menu
+                        $menu[$controllerRoute][] = "{$controllerRoute}/$actionRoute";
+                    }
+                }
+            }
+        }
+
+        return $menu;
     }
 
     private function _toRoute($namespace)
