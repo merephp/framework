@@ -12,7 +12,7 @@ defined('BASE_PATH') or define('BASE_PATH', __DIR__ . '/../../../');
  * @param string $filePath
  * @return string
  */
-function app_path($filePath=nul)
+function app_path($filePath=null)
 {
     $relatedPath = DIRECTORY_SEPARATOR . "app";
     $relatedPath = ($filePath) ? $relatedPath . DIRECTORY_SEPARATOR . trim($filePath, DIRECTORY_SEPARATOR) : $relatedPath;
