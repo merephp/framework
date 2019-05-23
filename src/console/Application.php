@@ -28,12 +28,17 @@ class Application
             echo "\n\033[1mThe following commands are available:\033[0m\n";
 
             // Print routes
+            $leftColumnWidth = 35;
             foreach ($menu as $controller => $controllerMenu) {
                 // Controller
-                echo "\n- \e[33m{$controller}\e[0m  \033[1m{$controllerMenu['comment']}\033[0m\n";
+                $diff = $leftColumnWidth - strlen($controller);
+                $padding = str_repeat(" ", (($diff) > 0 ? $diff : 0) + 2);
+                echo "\n- \e[33m{$controller}\e[0m {$padding} \033[1m{$controllerMenu['comment']}\033[0m\n";
                 foreach ($controllerMenu['list'] as $route => $actionMenu) {
                     // Route
-                    echo "\e[32m    {$route}\e[0m {$actionMenu['comment']}\n";
+                    $diff = $leftColumnWidth - strlen($route);
+                    $padding = str_repeat(" ", ($diff) > 0 ? $diff : 0);
+                    echo "\e[32m    {$route}\e[0m {$padding} {$actionMenu['comment']}\n";
                 }
             }
             return;
